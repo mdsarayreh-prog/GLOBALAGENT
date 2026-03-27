@@ -1,0 +1,80 @@
+0 verbose cli C:\Program Files\nodejs\node.exe C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js
+1 info using npm@11.7.0
+2 info using node@v25.4.0
+3 silly config load:file:C:\Program Files\nodejs\node_modules\npm\npmrc
+4 silly config load:file:C:\Users\aaltik\Global Agent\.npmrc
+5 silly config load:file:C:\Users\aaltik\.npmrc
+6 silly config load:file:C:\Users\aaltik\AppData\Roaming\npm\etc\npmrc
+7 verbose title npm install sharp png-to-ico
+8 verbose argv "install" "--save-dev" "sharp" "png-to-ico" "--cache" ".npm-cache"
+9 verbose logfile logs-max:10 dir:C:\Users\aaltik\Global Agent\.npm-cache\_logs\2026-03-25T14_04_59_859Z-
+10 verbose logfile C:\Users\aaltik\Global Agent\.npm-cache\_logs\2026-03-25T14_04_59_859Z-debug-0.log
+11 silly logfile done cleaning log files
+12 silly packumentCache heap:4496293888 maxSize:1124073472 maxEntrySize:562036736
+13 silly idealTree buildDeps
+14 silly fetch manifest sharp@*
+15 silly packumentCache full:https://registry.npmjs.org/sharp cache-miss
+16 http fetch GET 200 https://registry.npmjs.org/npm 960ms
+17 http fetch GET 200 https://registry.npmjs.org/sharp 495ms (cache miss)
+18 silly packumentCache full:https://registry.npmjs.org/sharp set size:undefined disposed:false
+19 silly fetch manifest png-to-ico@*
+20 silly packumentCache full:https://registry.npmjs.org/png-to-ico cache-miss
+21 http fetch GET 200 https://registry.npmjs.org/png-to-ico 103ms (cache miss)
+22 silly packumentCache full:https://registry.npmjs.org/png-to-ico set size:undefined disposed:false
+23 silly placeDep ROOT png-to-ico@3.0.1 OK for: global-agent@1.0.0 want: *
+24 silly placeDep ROOT sharp@0.34.5 REPLACE for: global-agent@1.0.0 want: *
+25 silly fetch manifest pngjs@^7.0.0
+26 silly packumentCache full:https://registry.npmjs.org/pngjs cache-miss
+27 http fetch GET 200 https://registry.npmjs.org/pngjs 724ms (cache miss)
+28 silly packumentCache full:https://registry.npmjs.org/pngjs set size:undefined disposed:false
+29 silly placeDep ROOT pngjs@7.0.0 OK for: png-to-ico@3.0.1 want: ^7.0.0
+30 silly reify moves {}
+31 verbose stack Error: EPERM: operation not permitted, mkdir 'C:\Users\aaltik\Global Agent\node_modules\png-to-ico'
+31 verbose stack     at async mkdir (node:internal/fs/promises:856:10)
+31 verbose stack     at async C:\Program Files\nodejs\node_modules\npm\node_modules\@npmcli\arborist\lib\arborist\reify.js:572:20
+31 verbose stack     at async Promise.allSettled (index 0)
+31 verbose stack     at async #reifyPackages (C:\Program Files\nodejs\node_modules\npm\node_modules\@npmcli\arborist\lib\arborist\reify.js:309:11)
+31 verbose stack     at async Arborist.reify (C:\Program Files\nodejs\node_modules\npm\node_modules\@npmcli\arborist\lib\arborist\reify.js:121:5)
+31 verbose stack     at async Install.exec (C:\Program Files\nodejs\node_modules\npm\lib\commands\install.js:150:5)
+31 verbose stack     at async Npm.exec (C:\Program Files\nodejs\node_modules\npm\lib\npm.js:208:9)
+31 verbose stack     at async module.exports (C:\Program Files\nodejs\node_modules\npm\lib\cli\entry.js:67:5)
+32 error code EPERM
+33 error syscall mkdir
+34 error path C:\Users\aaltik\Global Agent\node_modules\png-to-ico
+35 error errno -4048
+36 error Error: EPERM: operation not permitted, mkdir 'C:\Users\aaltik\Global Agent\node_modules\png-to-ico'
+36 error     at async mkdir (node:internal/fs/promises:856:10)
+36 error     at async C:\Program Files\nodejs\node_modules\npm\node_modules\@npmcli\arborist\lib\arborist\reify.js:572:20
+36 error     at async Promise.allSettled (index 0)
+36 error     at async #reifyPackages (C:\Program Files\nodejs\node_modules\npm\node_modules\@npmcli\arborist\lib\arborist\reify.js:309:11)
+36 error     at async Arborist.reify (C:\Program Files\nodejs\node_modules\npm\node_modules\@npmcli\arborist\lib\arborist\reify.js:121:5)
+36 error     at async Install.exec (C:\Program Files\nodejs\node_modules\npm\lib\commands\install.js:150:5)
+36 error     at async Npm.exec (C:\Program Files\nodejs\node_modules\npm\lib\npm.js:208:9)
+36 error     at async module.exports (C:\Program Files\nodejs\node_modules\npm\lib\cli\entry.js:67:5) {
+36 error   errno: -4048,
+36 error   code: 'EPERM',
+36 error   syscall: 'mkdir',
+36 error   path: 'C:\\Users\\aaltik\\Global Agent\\node_modules\\png-to-ico'
+36 error }
+37 error
+37 error The operation was rejected by your operating system.
+37 error It's possible that the file was already in use (by a text editor or antivirus),
+37 error or that you lack permissions to access it.
+37 error
+37 error If you believe this might be a permissions issue, please double-check the
+37 error permissions of the file and its containing directories, or try running
+37 error the command again as root/Administrator.
+38 silly unfinished npm timer reify 1774447502186
+39 silly unfinished npm timer reify:createSparse 1774447504144
+40 verbose cwd C:\Users\aaltik\Global Agent
+41 verbose os Windows_NT 10.0.26200
+42 verbose node v25.4.0
+43 verbose npm  v11.7.0
+44 notice
+44 notice New minor version of npm available! 11.7.0 -> 11.12.0
+44 notice Changelog: https://github.com/npm/cli/releases/tag/v11.12.0
+44 notice To update run: npm install -g npm@11.12.0
+44 notice  { force: true, Symbol(proc-log.meta): true }
+45 verbose exit -4048
+46 verbose code -4048
+47 error A complete log of this run can be found in: C:\Users\aaltik\Global Agent\.npm-cache\_logs\2026-03-25T14_04_59_859Z-debug-0.log

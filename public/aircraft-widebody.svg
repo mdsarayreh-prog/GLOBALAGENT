@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1200" role="img" aria-label="Wide-body aircraft silhouette">
+  <g fill="#D9F4FF">
+    <rect x="566" y="96" width="68" height="900" rx="34" opacity="0.16" />
+    <rect x="579" y="120" width="42" height="70" rx="18" opacity="0.24" />
+    <path opacity="0.22" d="M600 348L130 470V566L600 518L1070 566V470L600 348Z" />
+    <path opacity="0.2" d="M600 698L320 800V872L600 842L880 872V800L600 698Z" />
+    <path opacity="0.18" d="M600 900L542 1078H658L600 900Z" />
+    <ellipse cx="355" cy="558" rx="22" ry="30" opacity="0.22" />
+    <ellipse cx="440" cy="548" rx="20" ry="28" opacity="0.22" />
+    <ellipse cx="760" cy="548" rx="20" ry="28" opacity="0.22" />
+    <ellipse cx="845" cy="558" rx="22" ry="30" opacity="0.22" />
+  </g>
+  <g
+    fill="none"
+    stroke="#D9F4FF"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    stroke-width="10"
+    opacity="0.26"
+  >
+    <rect x="566" y="96" width="68" height="900" rx="34" />
+    <path d="M600 348L130 470V566L600 518L1070 566V470L600 348Z" />
+    <path d="M600 698L320 800V872L600 842L880 872V800L600 698Z" />
+    <path d="M600 900L542 1078H658L600 900Z" />
+    <path d="M600 518V842" />
+  </g>
+</svg>
