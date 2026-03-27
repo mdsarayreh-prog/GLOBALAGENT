@@ -5,6 +5,23 @@ import { dirname, join, resolve } from "node:path";
 let dbSingleton: DatabaseSync | null = null;
 let initialized = false;
 
+function resolveJournalMode(): "WAL" | "DELETE" {
+  const configured = process.env.SQLITE_JOURNAL_MODE?.trim().toUpperCase();
+  if (configured === "DELETE") {
+    return "DELETE";
+  }
+
+  if (configured === "WAL") {
+    return "WAL";
+  }
+
+  if (process.env.WEBSITE_SITE_NAME || process.env.WEBSITE_INSTANCE_ID) {
+    return "DELETE";
+  }
+
+  return "WAL";
+}
+
 function resolveDbPath(): string {
   const configuredPath = process.env.DATABASE_URL?.trim() || process.env.GLOBAL_AGENT_DB_PATH?.trim();
   if (!configuredPath) {
@@ -70,7 +87,7 @@ export function getDb(): DatabaseSync {
   ensureDbDirectory(dbPath);
   dbSingleton = new DatabaseSync(dbPath);
   dbSingleton.exec("PRAGMA foreign_keys = ON;");
-  dbSingleton.exec("PRAGMA journal_mode = WAL;");
+  dbSingleton.exec(`PRAGMA journal_mode = ${resolveJournalMode()};`);
   dbSingleton.exec("PRAGMA busy_timeout = 5000;");
 
   if (!initialized) {
