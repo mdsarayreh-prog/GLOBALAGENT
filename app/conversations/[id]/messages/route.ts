@@ -58,7 +58,12 @@ export async function POST(request: Request, context: RouteContext): Promise<Res
 
   if ("error" in result) {
     if (result.error === "not_found") {
-      return jsonResponse({ error: "Conversation not found" }, 404);
+      return jsonResponse(
+        {
+          error: `Conversation not found (conversation=${id}, user=${scope.userId}, tenant=${scope.tenantId}, token=${scope.accessToken ? "yes" : "no"})`,
+        },
+        404
+      );
     }
 
     if (result.error === "archived") {

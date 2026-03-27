@@ -116,21 +116,6 @@ export function Chat({ workspaceMode }: ChatProps) {
   }, [theme]);
 
   useEffect(() => {
-    const cookiePairs = document.cookie.split(";").map((part) => part.trim());
-    const hasUserId = cookiePairs.some((pair) => pair.startsWith("user_id="));
-    const hasTenantId = cookiePairs.some((pair) => pair.startsWith("tenant_id="));
-
-    if (!hasUserId) {
-      const generated = `usr_${crypto.randomUUID().replace(/-/g, "").slice(0, 20)}`;
-      document.cookie = `user_id=${generated}; path=/; samesite=lax`;
-    }
-
-    if (!hasTenantId) {
-      document.cookie = "tenant_id=default-workspace; path=/; samesite=lax";
-    }
-  }, []);
-
-  useEffect(() => {
     const media = window.matchMedia("(max-width: 1023px)");
 
     const handleViewportChange = (matches: boolean) => {
