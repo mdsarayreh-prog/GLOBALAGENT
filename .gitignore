@@ -6,3 +6,4 @@ coverage
 .env.local
 data/*.sqlite
 data/*.sqlite-*
+.env.local
