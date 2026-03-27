@@ -9,8 +9,9 @@ import {
 } from "@/lib/server/authSession";
 
 export async function GET(request: NextRequest) {
-  const response = NextResponse.redirect(new URL("/sign-in", request.url));
-  const secure = new URL(getAppBaseUrl()).protocol === "https:";
+  const appBaseUrl = new URL(getAppBaseUrl());
+  const response = NextResponse.redirect(new URL("/sign-in", appBaseUrl));
+  const secure = appBaseUrl.protocol === "https:";
   destroySession(request.cookies.get(getSessionCookieName())?.value);
 
   response.cookies.set(getSessionCookieName(), "", {

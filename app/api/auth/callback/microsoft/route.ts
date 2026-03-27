@@ -12,7 +12,8 @@ import {
 } from "@/lib/server/authSession";
 
 export async function GET(request: NextRequest) {
-  const { clientId, clientSecret, redirectUri, tokenUrl, scope } = getMicrosoftAuthConfig();
+  const { clientId, clientSecret, redirectUri, tokenUrl, scope, baseUrl } = getMicrosoftAuthConfig();
+  const appBaseUrl = new URL(baseUrl);
   const url = new URL(request.url);
   const error = url.searchParams.get("error");
   const code = url.searchParams.get("code");
@@ -20,11 +21,11 @@ export async function GET(request: NextRequest) {
   const cookieState = readSignedValue(request.cookies.get(getAuthStateCookieName())?.value);
 
   if (error) {
-    return NextResponse.redirect(new URL(`/sign-in?error=${encodeURIComponent(error)}`, request.url));
+    return NextResponse.redirect(new URL(`/sign-in?error=${encodeURIComponent(error)}`, appBaseUrl));
   }
 
   if (!code || !returnedState || !cookieState || returnedState !== cookieState) {
-    return NextResponse.redirect(new URL("/sign-in?error=state_mismatch", request.url));
+    return NextResponse.redirect(new URL("/sign-in?error=state_mismatch", appBaseUrl));
   }
 
   const tokenResponse = await fetch(tokenUrl, {
@@ -53,11 +54,11 @@ export async function GET(request: NextRequest) {
 
   if (!tokenResponse.ok) {
     const reason = payload.error || `token_${tokenResponse.status}`;
-    return NextResponse.redirect(new URL(`/sign-in?error=${encodeURIComponent(reason)}`, request.url));
+    return NextResponse.redirect(new URL(`/sign-in?error=${encodeURIComponent(reason)}`, appBaseUrl));
   }
 
   const session = buildSessionFromTokenResponse(payload);
-  const response = NextResponse.redirect(new URL("/user", request.url));
+  const response = NextResponse.redirect(new URL("/user", appBaseUrl));
   const secure = new URL(getAppBaseUrl()).protocol === "https:";
 
   response.cookies.set(getSessionCookieName(), encodeSession(session), {
