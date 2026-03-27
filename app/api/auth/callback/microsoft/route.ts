@@ -58,7 +58,29 @@ export async function GET(request: NextRequest) {
   }
 
   const session = buildSessionFromTokenResponse(payload);
-  const response = NextResponse.redirect(new URL("/user", appBaseUrl));
+  const destination = new URL("/user", appBaseUrl).toString();
+  const response = new NextResponse(
+    `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="refresh" content="0;url=${destination}" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Signing in...</title>
+  </head>
+  <body>
+    <p>Signing in...</p>
+    <script>window.location.replace(${JSON.stringify(destination)});</script>
+  </body>
+</html>`,
+    {
+      status: 200,
+      headers: {
+        "Content-Type": "text/html; charset=utf-8",
+        "Cache-Control": "no-store",
+      },
+    }
+  );
   const secure = new URL(getAppBaseUrl()).protocol === "https:";
 
   response.cookies.set(getSessionCookieName(), encodeSession(session), {
