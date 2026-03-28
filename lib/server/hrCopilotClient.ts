@@ -20,6 +20,14 @@ interface CachedHrToken {
 
 interface TokenClaims {
   roles?: string[];
+  aud?: string;
+  appid?: string;
+  azp?: string;
+  tid?: string;
+  oid?: string;
+  sub?: string;
+  upn?: string;
+  preferred_username?: string;
 }
 
 let cachedHrToken: CachedHrToken | null = null;
@@ -73,6 +81,20 @@ function ensureCopilotInvokePermission(token: string) {
   throw new Error(
     "Power Platform token is missing Copilot invocation permissions. Add Power Platform API application permission `CopilotStudio.Copilots.Invoke` to app registration `15fd4b3e-f1af-4b6f-a928-6ce43a68ba6c`, then grant admin consent."
   );
+}
+
+function summarizeToken(token: string) {
+  const claims = decodeJwtClaims(token);
+  return {
+    aud: claims.aud ?? null,
+    tid: claims.tid ?? null,
+    oid: claims.oid ?? null,
+    sub: claims.sub ?? null,
+    appid: claims.appid ?? null,
+    azp: claims.azp ?? null,
+    upn: claims.upn ?? claims.preferred_username ?? null,
+    roles: Array.isArray(claims.roles) ? claims.roles : [],
+  };
 }
 
 async function fetchHrClientCredentialToken(): Promise<string> {
@@ -176,7 +198,17 @@ async function withTimeout<T>(promise: Promise<T>, timeoutMs: number, label: str
 }
 
 export async function requestHrAgent(prompt: string, accessToken?: string): Promise<string> {
+  const usingDelegatedToken = Boolean(accessToken?.trim());
   const token = accessToken?.trim() || (await resolveHrAuthToken());
+  const tokenSummary = summarizeToken(token);
+  console.info("[hr-agent] request start", {
+    usingDelegatedToken,
+    timeoutMs: HR_REQUEST_TIMEOUT_MS,
+    connectionUrl: HR_CONNECTION_URL,
+    tokenSummary,
+    promptChars: prompt.length,
+  });
+
   const client = buildClient(token);
   const conversationId = crypto.randomUUID();
 
@@ -194,15 +226,47 @@ export async function requestHrAgent(prompt: string, accessToken?: string): Prom
     },
   });
 
-  const response = await withTimeout(
-    client.executeWithResponse(activity, conversationId),
-    HR_REQUEST_TIMEOUT_MS,
-    "HR turn execution"
-  );
+  const startedAt = Date.now();
+  let response: Awaited<ReturnType<CopilotStudioClient["executeWithResponse"]>>;
+  try {
+    response = await withTimeout(
+      client.executeWithResponse(activity, conversationId),
+      HR_REQUEST_TIMEOUT_MS,
+      "HR turn execution"
+    );
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown HR execution error";
+    console.error("[hr-agent] request failed", {
+      usingDelegatedToken,
+      conversationId,
+      elapsedMs: Date.now() - startedAt,
+      tokenSummary,
+      error: message,
+    });
+    throw error;
+  }
+
+  console.info("[hr-agent] request completed", {
+    usingDelegatedToken,
+    conversationId,
+    elapsedMs: Date.now() - startedAt,
+    activityCount: Array.isArray(response.activities) ? response.activities.length : 0,
+  });
   const reply = extractReplyText(response.activities);
   if (!reply) {
+    console.error("[hr-agent] no readable reply", {
+      usingDelegatedToken,
+      conversationId,
+      tokenSummary,
+      activityCount: Array.isArray(response.activities) ? response.activities.length : 0,
+    });
     throw new Error("HR agent returned no readable message.");
   }
 
+  console.info("[hr-agent] reply extracted", {
+    usingDelegatedToken,
+    conversationId,
+    replyChars: reply.length,
+  });
   return reply;
 }
