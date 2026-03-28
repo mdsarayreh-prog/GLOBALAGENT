@@ -13,6 +13,8 @@ export interface ClientRequestContextHeaders {
   "x-tenant-id"?: string;
 }
 
+const API_REQUEST_TIMEOUT_MS = 70000;
+
 interface ListConversationsResponse {
   data: ConversationListItem[];
   pagination: {
@@ -64,14 +66,24 @@ function resolveErrorMessage(payload: unknown, fallback: string): string {
 }
 
 async function apiFetch<T>(input: string, init?: RequestInit, contextHeaders?: ClientRequestContextHeaders): Promise<T> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), API_REQUEST_TIMEOUT_MS);
+
   const response = await fetch(input, {
     ...init,
     credentials: "include",
+    signal: controller.signal,
     headers: {
       "Content-Type": "application/json",
       ...(contextHeaders ?? {}),
       ...(init?.headers ?? {}),
     },
+  }).finally(() => clearTimeout(timeoutId)).catch((error: unknown) => {
+    if (error instanceof DOMException && error.name === "AbortError") {
+      throw new Error(`Request timed out after ${API_REQUEST_TIMEOUT_MS}ms`);
+    }
+
+    throw error;
   });
 
   const payload = await readJson<T | { error?: string }>(response);
