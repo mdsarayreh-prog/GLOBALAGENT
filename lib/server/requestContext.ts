@@ -43,6 +43,7 @@ export function getRequestContext(request: Request): RequestContext {
   const cookies = parseCookieHeader(request.headers.get("cookie"));
   const forwardedSession = request.headers.get("x-app-session") ?? undefined;
   const session = decodeSession(forwardedSession || cookies.app_session);
+  const forwardedAccessToken = sanitizeBearerToken(request.headers.get("x-access-token"));
   const role = cookies.role === "admin" ? "admin" : "user";
 
   const userId =
@@ -61,8 +62,17 @@ export function getRequestContext(request: Request): RequestContext {
     userId,
     tenantId,
     role,
-    accessToken: session?.accessToken,
+    accessToken: forwardedAccessToken ?? session?.accessToken,
   };
+}
+
+function sanitizeBearerToken(value: string | null | undefined): string | undefined {
+  if (!value || typeof value !== "string") {
+    return undefined;
+  }
+
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : undefined;
 }
 
 export function getPagination(searchParams: URLSearchParams, defaultLimit = 30, maxLimit = 100) {

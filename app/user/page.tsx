@@ -20,6 +20,7 @@ export default async function UserPage() {
         "x-app-session": sessionHandle,
         "x-user-id": session.user.id,
         "x-tenant-id": session.user.tenantId,
+        "x-access-token": session.accessToken,
       }}
     />
   );

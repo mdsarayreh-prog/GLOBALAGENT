@@ -11,6 +11,7 @@ export interface ClientRequestContextHeaders {
   "x-app-session"?: string;
   "x-user-id"?: string;
   "x-tenant-id"?: string;
+  "x-access-token"?: string;
 }
 
 const API_REQUEST_TIMEOUT_MS = 70000;
