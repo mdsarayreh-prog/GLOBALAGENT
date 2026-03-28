@@ -12,32 +12,33 @@ export async function GET(request: NextRequest) {
   const appBaseUrl = new URL(getAppBaseUrl());
   const response = NextResponse.redirect(new URL("/sign-in", appBaseUrl));
   const secure = appBaseUrl.protocol === "https:";
+  const sameSite = secure ? "none" : "lax";
   destroySession(request.cookies.get(getSessionCookieName())?.value);
 
   response.cookies.set(getSessionCookieName(), "", {
     path: "/",
-    sameSite: "lax",
+    sameSite,
     httpOnly: true,
     secure,
     expires: new Date(0),
   });
   response.cookies.set("role", "", {
     path: "/",
-    sameSite: "lax",
+    sameSite,
     httpOnly: false,
     secure,
     expires: new Date(0),
   });
   response.cookies.set("user_id", "", {
     path: "/",
-    sameSite: "lax",
+    sameSite,
     httpOnly: false,
     secure,
     expires: new Date(0),
   });
   response.cookies.set("tenant_id", "", {
     path: "/",
-    sameSite: "lax",
+    sameSite,
     httpOnly: false,
     secure,
     expires: new Date(0),

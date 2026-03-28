@@ -82,31 +82,32 @@ export async function GET(request: NextRequest) {
     }
   );
   const secure = new URL(getAppBaseUrl()).protocol === "https:";
+  const sameSite = secure ? "none" : "lax";
 
   response.cookies.set(getSessionCookieName(), encodeSession(session), {
     httpOnly: true,
-    sameSite: "lax",
+    sameSite,
     secure,
     path: "/",
     expires: new Date(session.expiresAt),
   });
   response.cookies.set("user_id", session.user.id, {
     httpOnly: false,
-    sameSite: "lax",
+    sameSite,
     secure,
     path: "/",
     expires: new Date(session.expiresAt),
   });
   response.cookies.set("tenant_id", session.user.tenantId, {
     httpOnly: false,
-    sameSite: "lax",
+    sameSite,
     secure,
     path: "/",
     expires: new Date(session.expiresAt),
   });
   response.cookies.set("role", "user", {
     httpOnly: false,
-    sameSite: "lax",
+    sameSite,
     secure,
     path: "/",
     expires: new Date(session.expiresAt),

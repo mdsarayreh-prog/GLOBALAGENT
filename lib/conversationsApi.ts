@@ -60,6 +60,7 @@ function resolveErrorMessage(payload: unknown, fallback: string): string {
 async function apiFetch<T>(input: string, init?: RequestInit): Promise<T> {
   const response = await fetch(input, {
     ...init,
+    credentials: "include",
     headers: {
       "Content-Type": "application/json",
       ...(init?.headers ?? {}),
