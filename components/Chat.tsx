@@ -11,6 +11,7 @@ import { TopBar } from "@/components/TopBar";
 import { TracePanel } from "@/components/TracePanel";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import {
+  ClientRequestContextHeaders,
   createConversation,
   deleteConversation,
   getConversation,
@@ -28,6 +29,7 @@ import { AttachmentMetadata, ConversationListItem, ConversationRecord, TraceEven
 
 interface ChatProps {
   workspaceMode: "user" | "admin";
+  requestContextHeaders?: ClientRequestContextHeaders;
 }
 
 function toListItem(conversation: ConversationRecord): ConversationListItem {
@@ -38,7 +40,7 @@ function toListItem(conversation: ConversationRecord): ConversationListItem {
   };
 }
 
-export function Chat({ workspaceMode }: ChatProps) {
+export function Chat({ workspaceMode, requestContextHeaders }: ChatProps) {
   const isAdminWorkspace = workspaceMode === "admin";
   const agents = useMemo(() => getEnabledAgents(), []);
   const [conversations, setConversations] = useState<ConversationListItem[]>([]);
@@ -69,9 +71,9 @@ export function Chat({ workspaceMode }: ChatProps) {
   const loadConversation = useCallback(
     async (conversationId: string) => {
       const [conversation, messageResponse, traceResponse] = await Promise.all([
-        getConversation(conversationId),
-        listMessages(conversationId, { limit: 250, offset: 0 }),
-        listTraceEvents(conversationId),
+        getConversation(conversationId, requestContextHeaders),
+        listMessages(conversationId, { limit: 250, offset: 0 }, requestContextHeaders),
+        listTraceEvents(conversationId, undefined, requestContextHeaders),
       ]);
 
       setActiveConversation(conversation);
@@ -84,12 +86,12 @@ export function Chat({ workspaceMode }: ChatProps) {
       setAutoRoute(isAdminWorkspace ? conversation.autoRouteEnabled : true);
       setRecentAgentIds((current) => [nextAgent, ...current.filter((id) => id !== nextAgent)].slice(0, 4));
     },
-    [isAdminWorkspace]
+    [isAdminWorkspace, requestContextHeaders]
   );
 
   const refreshConversations = useCallback(
     async (search: string, ensureOne = false) => {
-      const response = await listConversations({ limit: 120, offset: 0, search: search || undefined });
+        const response = await listConversations({ limit: 120, offset: 0, search: search || undefined }, requestContextHeaders);
       let items = response.data;
 
       if (ensureOne && !search && items.length === 0) {
@@ -97,14 +99,14 @@ export function Chat({ workspaceMode }: ChatProps) {
           defaultAgentId: "global",
           autoRouteEnabled: true,
           title: "New chat",
-        });
+        }, requestContextHeaders);
         items = [toListItem(created)];
       }
 
       setConversations(items);
       return items;
     },
-    []
+    [requestContextHeaders]
   );
 
   useEffect(() => {
@@ -249,7 +251,7 @@ export function Chat({ workspaceMode }: ChatProps) {
         defaultAgentId: isAdminWorkspace ? selectedAgentId : "global",
         autoRouteEnabled: isAdminWorkspace ? autoRoute : true,
         title: "New chat",
-      });
+      }, requestContextHeaders);
 
       setConversations((current) => [toListItem(created), ...current]);
       await loadConversation(created.id);
@@ -277,7 +279,7 @@ export function Chat({ workspaceMode }: ChatProps) {
       return;
     }
 
-    const updated = await patchConversation(activeConversationId, patch);
+    const updated = await patchConversation(activeConversationId, patch, requestContextHeaders);
     setActiveConversation(updated);
     setConversations((current) =>
       current.map((conversation) => (conversation.id === updated.id ? { ...conversation, ...updated } : conversation))
@@ -315,7 +317,7 @@ export function Chat({ workspaceMode }: ChatProps) {
 
   async function handleArchiveConversation(conversationId: string) {
     try {
-      await patchConversation(conversationId, { status: "archived" });
+      await patchConversation(conversationId, { status: "archived" }, requestContextHeaders);
       await refreshConversations(searchValue, false);
 
       if (conversationId === activeConversationId) {
@@ -342,7 +344,7 @@ export function Chat({ workspaceMode }: ChatProps) {
     }
 
     try {
-      await deleteConversation(conversationId);
+      await deleteConversation(conversationId, requestContextHeaders);
       const remaining = await refreshConversations(searchValue, false);
 
       if (isActiveConversation) {
@@ -362,7 +364,7 @@ export function Chat({ workspaceMode }: ChatProps) {
 
   async function handleTogglePin(conversationId: string, nextPinned: boolean) {
     try {
-      await patchConversation(conversationId, { isPinned: nextPinned });
+      await patchConversation(conversationId, { isPinned: nextPinned }, requestContextHeaders);
       await refreshConversations(searchValue, false);
     } catch (error) {
       const message = error instanceof Error ? error.message : "Failed to update pin state";
@@ -420,7 +422,7 @@ export function Chat({ workspaceMode }: ChatProps) {
         selectedAgentId: selectedAgent,
         autoRouteEnabled: nextAutoRoute,
         attachments: payload.attachments,
-      });
+      }, requestContextHeaders);
 
       const result = response.data;
       setMessages((current) => [

@@ -7,6 +7,12 @@ import {
   TraceEventRecord,
 } from "@/types/conversation";
 
+export interface ClientRequestContextHeaders {
+  "x-app-session"?: string;
+  "x-user-id"?: string;
+  "x-tenant-id"?: string;
+}
+
 interface ListConversationsResponse {
   data: ConversationListItem[];
   pagination: {
@@ -57,12 +63,13 @@ function resolveErrorMessage(payload: unknown, fallback: string): string {
   return typeof record.error === "string" ? record.error : fallback;
 }
 
-async function apiFetch<T>(input: string, init?: RequestInit): Promise<T> {
+async function apiFetch<T>(input: string, init?: RequestInit, contextHeaders?: ClientRequestContextHeaders): Promise<T> {
   const response = await fetch(input, {
     ...init,
     credentials: "include",
     headers: {
       "Content-Type": "application/json",
+      ...(contextHeaders ?? {}),
       ...(init?.headers ?? {}),
     },
   });
@@ -79,11 +86,11 @@ export async function createConversation(payload?: {
   title?: string;
   defaultAgentId?: AgentId;
   autoRouteEnabled?: boolean;
-}): Promise<ConversationRecord> {
+}, contextHeaders?: ClientRequestContextHeaders): Promise<ConversationRecord> {
   const response = await apiFetch<{ data: ConversationRecord }>("/conversations", {
     method: "POST",
     body: JSON.stringify(payload ?? {}),
-  });
+  }, contextHeaders);
   return response.data;
 }
 
@@ -91,7 +98,7 @@ export async function listConversations(params?: {
   limit?: number;
   offset?: number;
   search?: string;
-}): Promise<ListConversationsResponse> {
+}, contextHeaders?: ClientRequestContextHeaders): Promise<ListConversationsResponse> {
   const query = new URLSearchParams();
   if (typeof params?.limit === "number") {
     query.set("limit", String(params.limit));
@@ -106,13 +113,13 @@ export async function listConversations(params?: {
   const suffix = query.toString() ? `?${query.toString()}` : "";
   return apiFetch<ListConversationsResponse>(`/conversations${suffix}`, {
     method: "GET",
-  });
+  }, contextHeaders);
 }
 
-export async function getConversation(conversationId: string): Promise<ConversationRecord> {
+export async function getConversation(conversationId: string, contextHeaders?: ClientRequestContextHeaders): Promise<ConversationRecord> {
   const response = await apiFetch<{ data: ConversationRecord }>(`/conversations/${encodeURIComponent(conversationId)}`, {
     method: "GET",
-  });
+  }, contextHeaders);
   return response.data;
 }
 
@@ -124,22 +131,27 @@ export async function patchConversation(
     status?: "active" | "archived";
     defaultAgentId?: AgentId;
     isPinned?: boolean;
-  }
+  },
+  contextHeaders?: ClientRequestContextHeaders
 ): Promise<ConversationRecord> {
   const response = await apiFetch<{ data: ConversationRecord }>(`/conversations/${encodeURIComponent(conversationId)}`, {
     method: "PATCH",
     body: JSON.stringify(patch),
-  });
+  }, contextHeaders);
   return response.data;
 }
 
-export async function deleteConversation(conversationId: string): Promise<void> {
+export async function deleteConversation(conversationId: string, contextHeaders?: ClientRequestContextHeaders): Promise<void> {
   await apiFetch<{ ok: boolean }>(`/conversations/${encodeURIComponent(conversationId)}`, {
     method: "DELETE",
-  });
+  }, contextHeaders);
 }
 
-export async function listMessages(conversationId: string, params?: { limit?: number; offset?: number }): Promise<ListMessagesResponse> {
+export async function listMessages(
+  conversationId: string,
+  params?: { limit?: number; offset?: number },
+  contextHeaders?: ClientRequestContextHeaders
+): Promise<ListMessagesResponse> {
   const query = new URLSearchParams();
   if (typeof params?.limit === "number") {
     query.set("limit", String(params.limit));
@@ -151,7 +163,7 @@ export async function listMessages(conversationId: string, params?: { limit?: nu
   const suffix = query.toString() ? `?${query.toString()}` : "";
   return apiFetch<ListMessagesResponse>(`/conversations/${encodeURIComponent(conversationId)}/messages${suffix}`, {
     method: "GET",
-  });
+  }, contextHeaders);
 }
 
 export async function postMessage(
@@ -161,15 +173,20 @@ export async function postMessage(
     selectedAgentId: AgentId;
     autoRouteEnabled: boolean;
     attachments?: AttachmentMetadata[];
-  }
+  },
+  contextHeaders?: ClientRequestContextHeaders
 ): Promise<MessageTurnResponse> {
   return apiFetch<MessageTurnResponse>(`/conversations/${encodeURIComponent(conversationId)}/messages`, {
     method: "POST",
     body: JSON.stringify(payload),
-  });
+  }, contextHeaders);
 }
 
-export async function listTraceEvents(conversationId: string, messageId?: string): Promise<ListTraceResponse> {
+export async function listTraceEvents(
+  conversationId: string,
+  messageId?: string,
+  contextHeaders?: ClientRequestContextHeaders
+): Promise<ListTraceResponse> {
   const query = new URLSearchParams();
   if (messageId) {
     query.set("message_id", messageId);
@@ -178,5 +195,5 @@ export async function listTraceEvents(conversationId: string, messageId?: string
   const suffix = query.toString() ? `?${query.toString()}` : "";
   return apiFetch<ListTraceResponse>(`/conversations/${encodeURIComponent(conversationId)}/trace${suffix}`, {
     method: "GET",
-  });
+  }, contextHeaders);
 }

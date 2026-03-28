@@ -41,7 +41,8 @@ function sanitizeId(value: string | null | undefined): string | null {
 
 export function getRequestContext(request: Request): RequestContext {
   const cookies = parseCookieHeader(request.headers.get("cookie"));
-  const session = decodeSession(cookies.app_session);
+  const forwardedSession = request.headers.get("x-app-session") ?? undefined;
+  const session = decodeSession(forwardedSession || cookies.app_session);
   const role = cookies.role === "admin" ? "admin" : "user";
 
   const userId =
